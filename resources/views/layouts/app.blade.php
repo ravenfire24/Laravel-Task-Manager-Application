@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>@yield('title', 'Tasks') &middot; Task Manager</title>
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}">
@@ -45,6 +46,7 @@
         <footer class="container pb-4 text-muted small">Task Manager <span class="mx-2" aria-hidden="true">/</span> Keep the next step in sight.</footer>
         <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+        @stack('scripts')
         <script src="{{ asset('js/tasks.js') }}"></script>
     </body>
 </html>

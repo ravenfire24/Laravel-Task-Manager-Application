@@ -265,3 +265,27 @@ label {
     }
 }
 
+
+.drag-handle {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 0 2px;
+    font-size: 1.2rem;
+    cursor: grab;
+    touch-action: none;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+.task-drag-placeholder {
+    background: #e3f0e7;
+    opacity: .55;
+}
+
+@media (max-width: 575px) {
+    .task-copy {
+        flex-basis: calc(100% - 75px);
+    }
+}

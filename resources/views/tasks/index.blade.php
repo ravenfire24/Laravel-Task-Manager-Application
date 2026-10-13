@@ -51,9 +51,11 @@
     <div class="list-heading px-4 py-3 d-flex justify-content-between"><span>{{ $search !== '' || $status !== '' ? 'Filtered tasks' : 'All tasks' }}</span><span class="text-muted">{{ $tasks->total() }} {{ Str::plural('task', $tasks->total()) }}</span>
     </div>
 
+    <div id="taskOrderList" data-order-url="{{ route('tasks.order') }}">
     @forelse($tasks as $task)
 
-        <article class="task-row {{ $task->status->value }} px-4 py-4">
+        <article class="task-row {{ $task->status->value }} px-4 py-4" data-id="{{ $task->id }}">
+            <button type="button" class="drag-handle" hidden aria-label="Reorder {{ $task->title }}" title="Drag to reorder; use up/down arrow keys" aria-describedby="orderHelp"><span aria-hidden="true">&#8942;&#8942;</span></button>
             <form method="post" action="{{ route('tasks.status', $task) }}" class="task-toggle">
                 @csrf
                 @method('PATCH')
@@ -90,6 +92,7 @@
         </div>
 
     @endforelse
+    </div>
 
     @if($tasks->hasPages())
         <div class="card-footer bg-white px-4 pt-4">{{ $tasks->links() }}</div>
@@ -97,6 +100,11 @@
 
 </section>
 <p class="small text-muted mt-3">Use the circle beside a task to change its status.</p>
+<p id="orderHelp" class="small text-muted" hidden>Drag the dotted handle to reorder tasks on this page, or focus it and use the up/down arrow keys. Changes save automatically.</p>
+<p id="orderMessage" class="small" role="status" aria-live="polite"></p>
 @include('tasks.partials.delete-modal')
+@push('scripts')
+    <script src="{{ asset('vendor/sortable/Sortable.min.js') }}"></script>
+@endpush
 @endsection
 
