@@ -1,4 +1,4 @@
-﻿# Laravel Task Manager
+# Laravel Task Manager
 
 A practical coding test submission built with **Laravel 13**, **Bootstrap 4.6.2**, Blade, and Eloquent. The application lets users create, view, edit, delete, and update the status of tasks.
 
@@ -7,6 +7,13 @@ A practical coding test submission built with **Laravel 13**, **Bootstrap 4.6.2*
 **Live app:** [https://laravel-task-manager-application.vercel.app/tasks](https://laravel-task-manager-application.vercel.app/tasks)
 
 The application runs locally. The optional live demo may require Vercel sign-in.
+
+## Submission Instructions
+
+1. **Local application:** the application has been verified running locally. Follow the [local setup](#local-setup) instructions to run it at http://localhost:8000.
+2. **Project setup:** the [local setup](#local-setup) section lists the requirements, installation commands, and database setup.
+3. **Final code on GitHub:** [Laravel-Task-Manager-Application](https://github.com/ravenfire24/Laravel-Task-Manager-Application).
+4. **README contents:** this file includes an [overview of the approach](#approach), [assumptions](#assumptions), and [setup instructions](#local-setup).
 
 ## Approach
 
@@ -69,20 +76,3 @@ Bootstrap, jQuery, and SortableJS are included locally with their licenses. No N
 - Dates use UTC, new tasks appear at the top, and deletion is permanent.
 - Local development uses SQLite; the live application uses Postgres.
 - Credentials, local databases, and deployment connection files are excluded from Git.
-
-## Verification
-
-```bash
-php artisan test
-vendor/bin/pint --test
-```
-
-Local verification passed with **15 feature tests and 105 assertions**. Tests cover CRUD, validation, status changes, filtering, pagination, escaped content, and persistent ordering. They use an isolated in-memory SQLite database. GitHub Actions runs tests and formatting checks on PHP 8.3, 8.4, and 8.5.
-
-Live HTTP checks passed for CRUD, status changes, ordering, validation, and frontend assets. Visual layout and actual drag gestures still need a manual browser check.
-
-## Optional deployment
-
-Vercel is connected to GitHub: pushes to `main` automatically deploy production, and other branches create previews. Production and previews use separate Neon Postgres databases. Deployment configuration is included in `vercel.json`, with migrations run by `scripts/vercel-build.php`.
-
-Application keys and database connection strings are stored in Vercel environment variables. Deployment is optional for this submission; the local setup above is sufficient to review the application.
