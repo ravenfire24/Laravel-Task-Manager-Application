@@ -6,14 +6,9 @@ A practical coding test submission built with **Laravel 13**, **Bootstrap 4.6.2*
 
 **Live app:** [https://laravel-task-manager-application.vercel.app/tasks](https://laravel-task-manager-application.vercel.app/tasks)
 
-The application runs locally. The optional live demo may require Vercel sign-in.
 
-## Submission Instructions
 
-1. **Local application:** the application has been verified running locally. Follow the [local setup](#local-setup) instructions to run it at http://localhost:8000.
-2. **Project setup:** the [local setup](#local-setup) section lists the requirements, installation commands, and database setup.
-3. **Final code on GitHub:** [Laravel-Task-Manager-Application](https://github.com/ravenfire24/Laravel-Task-Manager-Application).
-4. **README contents:** this file includes an [overview of the approach](#approach), [assumptions](#assumptions), and [setup instructions](#local-setup).
+
 
 ## Approach
 
