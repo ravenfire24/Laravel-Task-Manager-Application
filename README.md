@@ -1,70 +1,88 @@
-# Laravel Task Manager
+﻿# Laravel Task Manager
 
-A Laravel 13 application for creating, viewing, editing, completing, and deleting tasks. Built with Blade, Eloquent, and Bootstrap 4.6.2.
+A practical coding test submission built with **Laravel 13**, **Bootstrap 4.6.2**, Blade, and Eloquent. The application lets users create, view, edit, delete, and update the status of tasks.
+
+**GitHub repository:** [Laravel-Task-Manager-Application](https://github.com/ravenfire24/Laravel-Task-Manager-Application)
 
 **Live app:** [https://laravel-task-manager-application.vercel.app/tasks](https://laravel-task-manager-application.vercel.app/tasks)
 
-Vercel sign-in may be required to access the live app.
+The application runs locally. The optional live demo may require Vercel sign-in.
 
-## Features
+## Approach
 
-- Required task title and status; optional description.
-- Shared validation for creation and editing, with field errors and preserved input.
-- Pending/completed status controls and distinct badges.
-- Task list with creation dates and a separate detail page.
-- Delete confirmation modal and success messages.
-- Search by title, filter by status, and pagination with 10 tasks per page.
-- Drag-and-drop ordering with mouse, touch, or keyboard arrow keys. The order persists after refresh; only tasks on the current page move.
+The application uses Laravel resource routes and a small controller for task CRUD. A shared form request validates both creation and editing. Eloquent models and migrations manage the database, while Blade views use Bootstrap 4 forms, cards, badges, alerts, pagination, and a deletion modal.
 
-## Run locally
+Task status is represented by a pending/completed enum. Ordering is handled by a separate controller that validates task IDs and saves their positions in a database transaction. Shared form and modal partials keep the views easy to maintain.
 
-Requires **PHP 8.3+**, **Composer 2**, and PHP's standard Laravel extensions, including PDO SQLite and SQLite3.
+## Required features
 
-```sh
+- Create tasks with a required title and status, plus an optional description.
+- View tasks with their title, creation date, and status.
+- Edit task details with the same validation used for creation.
+- Mark tasks as pending or completed, with distinct status badges.
+- Delete tasks after confirming in a Bootstrap modal.
+- Display validation errors, preserve entered values, and show success messages.
+
+Blade escapes task content, all writes use CSRF protection, and missing tasks return a friendly 404 page. Error pages also cover expired sessions and unexpected server failures.
+
+## Local setup
+
+### Requirements
+
+- PHP 8.3 or newer with Laravel's standard PHP extensions, including PDO SQLite and SQLite3.
+- Composer 2.
+- Git.
+
+### Installation
+
+```bash
 git clone https://github.com/ravenfire24/Laravel-Task-Manager-Application.git
 cd Laravel-Task-Manager-Application
 composer run setup
 php artisan serve
 ```
 
-Open **http://localhost:8000**. Setup installs dependencies, creates `.env` and the application key, creates the SQLite database, and runs migrations. Run setup once for a fresh checkout.
+Open **http://localhost:8000**.
 
-Optional sample tasks: `php artisan db:seed`. After pulling new migrations, run `php artisan migrate`.
+Run `composer run setup` once for a fresh checkout. It installs dependencies, copies `.env.example` to `.env`, generates the application key, creates the SQLite database, and runs migrations. No database server is needed locally.
 
-Bootstrap, jQuery, and SortableJS are bundled locally with their licenses. No Node build or CDN connection is required.
+To add optional sample tasks:
 
-## Code structure
+```bash
+php artisan db:seed
+```
 
-| File | Responsibility |
-| --- | --- |
-| `TaskController` | CRUD, search, pagination, and status updates |
-| `TaskOrderController` | Validated order updates inside a database transaction |
-| `TaskRequest` | Shared create/edit validation |
-| `Task` / `TaskStatus` | Eloquent model and pending/completed enum |
-| `database/migrations` | Task schema and saved ordering |
-| `resources/views/tasks` | Blade pages, shared form, and delete modal |
+After pulling updates that include new migrations, run `php artisan migrate`.
 
-Blade escapes task content. Writes use CSRF protection, and route model binding handles missing tasks. Friendly error pages cover missing records, expired sessions, and server errors.
+Bootstrap, jQuery, and SortableJS are included locally with their licenses. No Node build step or CDN connection is required.
+
+## Bonus features
+
+- **Search and filtering:** search by title, filter by pending/completed status, or combine both.
+- **Pagination:** display 10 tasks per page while preserving search and status filters.
+- **Drag-and-drop ordering:** reorder tasks with mouse or touch. Focus a dotted handle and use the up/down arrow keys for keyboard control. Changes save automatically and persist after refresh. Only the visible tasks on the current page move; other pages and filtered-out tasks keep their positions.
+
+## Assumptions
+
+- This is one shared task list without application-level user accounts.
+- Pending is the initial form selection, but the server requires a valid status.
+- Dates use UTC, new tasks appear at the top, and deletion is permanent.
+- Local development uses SQLite; the live application uses Postgres.
+- Credentials, local databases, and deployment connection files are excluded from Git.
 
 ## Verification
 
-```sh
+```bash
 php artisan test
 vendor/bin/pint --test
 ```
 
-**15 feature tests, 105 assertions** cover CRUD, validation, both status transitions, filtering, pagination, escaped content, and saved ordering. Tests use an isolated in-memory SQLite database. GitHub Actions runs tests and formatting checks on PHP 8.3, 8.4, and 8.5.
+Local verification passed with **15 feature tests and 105 assertions**. Tests cover CRUD, validation, status changes, filtering, pagination, escaped content, and persistent ordering. They use an isolated in-memory SQLite database. GitHub Actions runs tests and formatting checks on PHP 8.3, 8.4, and 8.5.
 
-Live HTTP checks also passed for CRUD, status changes, order persistence, validation, and frontend assets. Visual layout and actual drag gestures still need a manual browser check.
+Live HTTP checks passed for CRUD, status changes, ordering, validation, and frontend assets. Visual layout and actual drag gestures still need a manual browser check.
 
-## Deployment
+## Optional deployment
 
-Vercel is connected to this repository. Pushes to **main** automatically deploy production; other branches create previews. Production and previews have separate Neon Postgres databases.
+Vercel is connected to GitHub: pushes to `main` automatically deploy production, and other branches create previews. Production and previews use separate Neon Postgres databases. Deployment configuration is included in `vercel.json`, with migrations run by `scripts/vercel-build.php`.
 
-`vercel.json` configures the community PHP runtime and static assets. The deployment script runs migrations through the direct database connection; application requests use the pooled connection. Sessions use encrypted cookies, temporary files hold compiled views, and logs go to stderr.
-
-Environment variables are managed in Vercel: `APP_KEY`, `APP_URL`, `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and the production PHP settings. Builds require `DB_CONNECTION=pgsql`, `DB_SSLMODE=require`, and `APP_ENV=production`. Keep the application key stable and migrations backward-compatible.
-
-## Assumptions
-
-This practical test uses one shared task list without application-level user accounts. Dates use UTC, new tasks start at the top, and deletion is permanent. Local development uses SQLite; deployment uses Postgres. Secrets, local databases, runtime tools, and Vercel connection files are excluded from Git.
+Application keys and database connection strings are stored in Vercel environment variables. Deployment is optional for this submission; the local setup above is sufficient to review the application.
