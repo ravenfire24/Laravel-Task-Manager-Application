@@ -24,7 +24,7 @@ class TaskController extends Controller
         $tasks = Task::query()
             ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
             ->when($status !== '', fn ($query) => $query->where('status', $status))
-            ->latest('id')
+            ->orderBy('position')->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

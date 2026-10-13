@@ -106,4 +106,53 @@ class TaskTest extends TestCase
         Task::factory()->create(['title' => 'Remove this task']);
         $this->get('/tasks')->assertOk()->assertSee('deleteTaskModal')->assertSee('Keep task')->assertSee('Delete task');
     }
+
+    public function test_task_order_is_saved_and_used_by_the_list(): void
+    {
+        $tasks = Task::factory()->count(3)->create();
+        $ids = $tasks->pluck('id')->all();
+        $this->patchJson('/tasks/order', ['ids' => $ids])->assertOk()->assertJson(['message' => 'Task order saved.']);
+        $this->get('/tasks')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === $ids);
+        $this->get('/tasks')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === $ids);
+    }
+
+    public function test_reordering_a_filtered_subset_keeps_hidden_tasks_in_their_slots(): void
+    {
+        $first = Task::factory()->create(['status' => TaskStatus::Pending]);
+        $hidden = Task::factory()->create(['status' => TaskStatus::Completed]);
+        $last = Task::factory()->create(['status' => TaskStatus::Pending]);
+        $hiddenPosition = $hidden->position;
+        $this->patchJson('/tasks/order', ['ids' => [$first->id, $last->id]])->assertOk();
+        $this->assertSame($hiddenPosition, $hidden->fresh()->position);
+        $this->get('/tasks')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === [$first->id, $hidden->id, $last->id]);
+        $this->get('/tasks?status=pending')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === [$first->id, $last->id]);
+    }
+
+    public function test_reordering_one_page_does_not_move_other_pages(): void
+    {
+        Task::factory()->count(12)->create();
+        $this->patchJson('/tasks/order', ['ids' => range(3, 12)])->assertOk();
+        $this->get('/tasks')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === range(3, 12));
+        $this->get('/tasks?page=2')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === [2, 1]);
+    }
+
+    public function test_invalid_order_requests_do_not_change_positions(): void
+    {
+        $tasks = Task::factory()->count(11)->create();
+        $positions = Task::orderBy('id')->pluck('position')->all();
+        foreach ([[], [$tasks[0]->id], [$tasks[0]->id, $tasks[0]->id], [$tasks[0]->id, 999], ['bad', $tasks[0]->id], $tasks->pluck('id')->all()] as $ids) {
+            $this->patchJson('/tasks/order', ['ids' => $ids])->assertUnprocessable();
+            $this->assertSame($positions, Task::orderBy('id')->pluck('position')->all());
+        }
+        $this->patchJson('/tasks/order', ['ids' => ['first' => 1, 'second' => 2]])->assertUnprocessable();
+    }
+
+    public function test_new_tasks_start_at_the_top_and_status_changes_keep_saved_order(): void
+    {
+        $tasks = Task::factory()->count(2)->create();
+        $this->patchJson('/tasks/order', ['ids' => $tasks->pluck('id')->all()])->assertOk();
+        $this->patch('/tasks/'.$tasks[0]->id.'/status', ['status' => 'completed'])->assertSessionHasNoErrors();
+        $new = Task::factory()->create();
+        $this->get('/tasks')->assertViewHas('tasks', fn ($page) => $page->pluck('id')->all() === [$new->id, $tasks[0]->id, $tasks[1]->id]);
+    }
 }
