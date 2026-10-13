@@ -27,6 +27,16 @@ $app['config']->set('database.connections.pgsql.url', $directUrl);
 $app['db']->purge('pgsql');
 
 // Each environment must have its own database. Never point previews at production data.
-$status = $kernel->call('migrate', ['--force' => true]);
-echo $kernel->output();
-exit($status);
+try {
+    $app['db']->connection()->getPdo();
+    $status = $kernel->call('migrate', ['--force' => true]);
+    echo $kernel->output();
+    if (! $app['db']->connection()->getSchemaBuilder()->hasTable('tasks')) {
+        fwrite(STDERR, "Task schema is missing after migrations.\n");
+        exit(1);
+    }
+    exit($status);
+} catch (Throwable $exception) {
+    fwrite(STDERR, 'Database connection or migration failed: '.$exception->getMessage()."\n");
+    exit(1);
+}
