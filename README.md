@@ -77,4 +77,17 @@ For a manual browser check: create a task, submit an empty title, edit both its 
 
 Repository: [ravenfire24/Laravel-Task-Manager-Application](https://github.com/ravenfire24/Laravel-Task-Manager-Application).
 
-No deployment is required. The application is designed for a local PHP server; the supplied Vercel link is not used for hosting.
+## Vercel deployment and automatic updates
+
+The repository includes a pinned [community PHP runtime](https://github.com/vercel-community/php), a serverless entry point, static asset routes, and a Composer deployment script. Local setup still uses SQLite.
+
+1. Import this GitHub repository in the Vercel team `project-b1ae` and grant the Vercel GitHub app access to it. Use the **Other** framework preset, Node.js **22.x**, and the repository root. Leave build/install/output overrides unset; `vercel.json` controls the PHP and static builds.
+2. Connect a persistent Neon Postgres database from Vercel Storage. The connection injects `DATABASE_URL`. Use a separate database for Preview deployments; do not connect preview builds to production data.
+3. Set a stable `APP_KEY` in Vercel's Production and Preview environment settings. Generate one with `php artisan key:generate --show` and enter it directly in Vercel. Set `APP_URL` to the project's HTTPS production URL. Never commit these secrets or regenerate the production key on every build.
+4. Deploy with `main` as the Production branch. Subsequent pushes to `main` trigger production deployments automatically; other branches create previews. Enable the Git integration in the project's Git settings.
+
+The build installs Composer production dependencies, discovers packages, and runs migrations against that environment's Postgres database. Builds fail clearly if the key or database connection is missing. Migrations must remain backward-compatible with the currently running deployment. Tasks persist across deployments; temporary storage is used only for compiled views and package manifests. Sessions are stored in encrypted cookies, logs go to stderr, and proxy handling preserves HTTPS form URLs.
+
+The app remains a shared task list without user accounts. Use Vercel deployment protection if you want a private review site. Do not publish private tasks to an unrestricted shared list.
+
+Deployment account connections and a live production deployment must be verified in Vercel; committing these files alone does not establish them.

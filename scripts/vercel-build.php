@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Contracts\Console\Kernel;
+
+require __DIR__.'/../vendor/autoload.php';
+$app = require __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Kernel::class);
+$kernel->bootstrap();
+
+if (! $app['config']->get('app.key')) {
+    fwrite(STDERR, "Set a stable APP_KEY in the Vercel project's environment variables before deploying.\n");
+    exit(1);
+}
+
+if ($app['config']->get('database.default') !== 'pgsql' || ! $app['config']->get('database.connections.pgsql.url')) {
+    fwrite(STDERR, "Connect a Postgres database and set DATABASE_URL (or DB_URL) in Vercel before deploying.\n");
+    exit(1);
+}
+
+// Each environment must have its own database. Never point previews at production data.
+$status = $kernel->call('migrate', ['--force' => true]);
+echo $kernel->output();
+exit($status);
