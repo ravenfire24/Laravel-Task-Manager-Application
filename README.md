@@ -82,7 +82,7 @@ Repository: [ravenfire24/Laravel-Task-Manager-Application](https://github.com/ra
 The repository includes a pinned [community PHP runtime](https://github.com/vercel-community/php), a serverless entry point, static asset routes, and a Composer deployment script. Local setup still uses SQLite.
 
 1. Import this GitHub repository in the Vercel team `project-b1ae` and grant the Vercel GitHub app access to it. Use the **Other** framework preset, Node.js **22.x**, and the repository root. Leave build/install/output overrides unset; `vercel.json` controls the PHP and static builds.
-2. Connect a persistent Neon Postgres database from Vercel Storage. The connection injects `DATABASE_URL`. Use a separate database for Preview deployments; do not connect preview builds to production data.
+2. Connect a persistent Neon Postgres database from Vercel Storage. The connection injects `DATABASE_URL` for requests and `DATABASE_URL_UNPOOLED` for migrations. Use a separate database for Preview deployments; do not connect preview builds to production data.
 3. Set a stable `APP_KEY` in Vercel's Production and Preview environment settings. Generate one with `php artisan key:generate --show` and enter it directly in Vercel. Set `APP_URL` to the project's HTTPS production URL. Never commit these secrets or regenerate the production key on every build.
 4. Deploy with `main` as the Production branch. Subsequent pushes to `main` trigger production deployments automatically; other branches create previews. Enable the Git integration in the project's Git settings.
 

@@ -17,6 +17,15 @@ if ($app['config']->get('database.default') !== 'pgsql' || ! $app['config']->get
     exit(1);
 }
 
+// Migrations need a direct connection; application requests keep using the pooled URL.
+$directUrl = getenv('DATABASE_URL_UNPOOLED') ?: getenv('DB_MIGRATION_URL');
+if (! $directUrl) {
+    fwrite(STDERR, "Set DATABASE_URL_UNPOOLED (or DB_MIGRATION_URL) for migrations.\n");
+    exit(1);
+}
+$app['config']->set('database.connections.pgsql.url', $directUrl);
+$app['db']->purge('pgsql');
+
 // Each environment must have its own database. Never point previews at production data.
 $status = $kernel->call('migrate', ['--force' => true]);
 echo $kernel->output();
