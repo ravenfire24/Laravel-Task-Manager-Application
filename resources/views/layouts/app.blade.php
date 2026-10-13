@@ -11,7 +11,6 @@
         <header class="app-header">
             <nav class="container d-flex align-items-center justify-content-between py-3" aria-label="Main navigation">
                 <a class="brand" href="{{ route('tasks.index') }}"><span class="brand-mark" aria-hidden="true">&#10003;</span> Task Manager</a>
-                <span class="header-note">A little structure. A clearer day.</span>
             </nav>
         </header>
         <main class="container py-5" id="main-content">

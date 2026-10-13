@@ -1,10 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Your tasks')
+@section('title', 'Tasks')
 @section('content')
 <div class="d-flex flex-wrap align-items-end justify-content-between mb-4 page-heading">
     <div>
-        <p class="eyebrow">YOUR WORK, AT A GLANCE</p>
-        <h1>Your tasks</h1>
+        <h1>Tasks</h1>
         <p class="text-muted mb-0">Capture what needs doing. Make room for what comes next.</p>
     </div>
     <a href="{{ route('tasks.create') }}" class="btn btn-primary mt-3"><span aria-hidden="true">+</span> New task</a>
