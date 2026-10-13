@@ -1,58 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Task Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A small task manager built with Laravel 13, Blade, Eloquent, and Bootstrap 4.6.2. Create tasks, read their details, edit them, change their status, and delete them after confirming in a modal.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.3 or newer with Laravel's standard extensions, plus PDO SQLite and SQLite3.
+- Composer 2.
+- Git.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Bootstrap and jQuery are included in `public/vendor` with their licenses. There is no Node build step or CDN dependency.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Local setup
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```sh
+git clone https://github.com/ravenfire24/Laravel-Task-Manager-Application.git
+cd Laravel-Task-Manager-Application
+composer run setup
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Open **http://localhost:8000**. The setup script installs dependencies, copies `.env.example` if needed, generates an application key, creates the SQLite file, and runs migrations. Run it once for a new checkout; generating a new key on an existing installation invalidates its sessions.
 
-## Contributing
+To add optional example tasks:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```sh
+php artisan db:seed
+```
 
-## Code of Conduct
+The seeder can be rerun without duplicating its sample titles. For MySQL, change the database settings in `.env` and run `php artisan migrate` against an empty database. The included SQLite defaults require no database server.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### This workspace on Windows
 
-## Security Vulnerabilities
+A portable PHP runtime and Composer were downloaded into ignored `.tools` for local verification. If they are still present, you can run without changing your PATH:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+.tools/php/php.exe artisan serve
+.tools/php/php.exe artisan test
+```
 
-## License
+Other checkouts should install PHP and Composer normally and use the setup commands above.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Approach
+
+- `TaskController` contains the small resource actions, list filters, and explicit status update.
+- `TaskRequest` shares create/edit validation: a title up to 255 characters, optional description up to 10,000 characters, and a required pending/completed status.
+- `TaskStatus` is a backed enum used for validation, model casting, and form options.
+- A migration defines the task table; Eloquent handles all database writes. Status is indexed, and lists are ordered by newest ID.
+- Blade escapes task content. All writes use CSRF protection and appropriate HTTP methods. Route model binding returns 404 for missing tasks.
+- Views share the layout, task form, and delete modal. JavaScript only connects the selected task to Bootstrap's modal; CRUD and status updates use normal forms.
+- Validation keeps entered values and shows field errors. Successful changes show flash messages. Friendly error views cover missing tasks, expired sessions, server failures, and maintenance. Laravel logs unexpected exceptions; set `APP_DEBUG=false` outside local development.
+
+## Bonus features
+
+Search by title, filter by status, combine both filters, and paginate ten tasks per page with filters preserved. Summary counts show totals across all tasks. There is also a separate detail page and optional sample data. Drag-and-drop reordering is not included.
+
+## Assumptions
+
+This is a single-user practical test with one shared task list and no authentication. Pending is selected initially, but the server still requires a valid status. Dates use the application's UTC timezone. Tasks are permanently deleted only after the UI confirmation. Do not expose this shared app publicly without adding authentication and authorization.
+
+## Verification
+
+```sh
+php artisan test
+vendor/bin/pint --test
+```
+
+Feature tests use an isolated in-memory SQLite database. They exercise CRUD, both status transitions, validation, old input, optional descriptions, filtering, pagination, escaped content, missing records, and modal markup. GitHub Actions runs the tests and formatting check on PHP 8.3, 8.4, and 8.5.
+
+Local verification passed: **10 feature tests, 78 assertions**, Laravel Pint, Composer manifest validation, Blade compilation, and a real HTTP task lifecycle including CSRF rejection. Browser automation was unavailable in the build session, so visual layout and modal interaction still need the manual check below.
+
+For a manual browser check: create a task, submit an empty title, edit both its fields and status, toggle its completion circle, search/filter it, then test both **Keep task** and **Delete task** in the modal. Check the same flow on a narrow screen.
+
+## Submission
+
+Repository: [ravenfire24/Laravel-Task-Manager-Application](https://github.com/ravenfire24/Laravel-Task-Manager-Application).
+
+No deployment is required. The application is designed for a local PHP server; the supplied Vercel link is not used for hosting.
