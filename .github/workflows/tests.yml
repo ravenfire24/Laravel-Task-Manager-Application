@@ -9,13 +9,14 @@ jobs:
       matrix:
         php: ['8.3', '8.4', '8.5']
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pdo_sqlite, sqlite3
           coverage: none
       - run: composer install --no-interaction --prefer-dist
+      - run: composer audit --locked
       - run: cp .env.example .env
       - run: php artisan key:generate
       - run: php artisan test

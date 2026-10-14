@@ -71,3 +71,5 @@ Bootstrap, jQuery, and SortableJS are included locally with their licenses. No N
 - Dates use UTC, new tasks appear at the top, and deletion is permanent.
 - Local development uses SQLite; the live application uses Postgres.
 - Credentials, local databases, and deployment connection files are excluded from Git.
+
+Security controls, deployment settings, and limitations are documented in [SECURITY.md](SECURITY.md).

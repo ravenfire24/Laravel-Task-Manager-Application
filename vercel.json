@@ -29,11 +29,12 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "DB_CONNECTION": "pgsql",
-        "DB_SSLMODE": "require",
-        "SESSION_DRIVER": "cookie",
+        "DB_SSLMODE": "verify-full",
+        "SESSION_DRIVER": "database",
         "SESSION_SECURE_COOKIE": "true",
         "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
-        "QUEUE_CONNECTION": "sync"
+        "QUEUE_CONNECTION": "sync",
+        "SESSION_ENCRYPT": "true"
     }
 }

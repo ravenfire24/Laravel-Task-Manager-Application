@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\DatabaseError;
 use Illuminate\Contracts\Console\Kernel;
 
 require __DIR__.'/../vendor/autoload.php';
@@ -30,6 +31,10 @@ $app['db']->purge('pgsql');
 try {
     $app['db']->connection()->getPdo();
     $status = $kernel->call('migrate', ['--force' => true]);
+    if ($status !== 0) {
+        fwrite(STDERR, "Migration command failed; see the structured database error log.\n");
+        exit($status);
+    }
     echo $kernel->output();
     if (! $app['db']->connection()->getSchemaBuilder()->hasTable('tasks')) {
         fwrite(STDERR, "Task schema is missing after migrations.\n");
@@ -37,6 +42,6 @@ try {
     }
     exit($status);
 } catch (Throwable $exception) {
-    fwrite(STDERR, 'Database connection or migration failed: '.$exception->getMessage()."\n");
+    fwrite(STDERR, 'Database connection or migration failed: '.json_encode(DatabaseError::context($exception))."\n");
     exit(1);
 }

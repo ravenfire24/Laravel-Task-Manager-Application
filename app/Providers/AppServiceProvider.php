@@ -2,16 +2,26 @@
 
 namespace App\Providers;
 
+use App\Database\VerifiedPostgresConnector;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind('db.connector.pgsql', VerifiedPostgresConnector::class);
+    }
 
     public function boot(): void
     {
         Paginator::useBootstrapFour();
+
+        RateLimiter::for('task-reads', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('task-writes', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         // The community PHP runtime's libpq needs Neon's endpoint passed explicitly.
         $url = config('database.connections.pgsql.url');
