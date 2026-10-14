@@ -20,9 +20,18 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFour();
 
+        $this->registerTaskRateLimits();
+        $this->configurePostgresEndpoint();
+    }
+
+    private function registerTaskRateLimits(): void
+    {
         RateLimiter::for('task-reads', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
         RateLimiter::for('task-writes', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+    }
 
+    private function configurePostgresEndpoint(): void
+    {
         // The community PHP runtime's libpq needs Neon's endpoint passed explicitly.
         $url = config('database.connections.pgsql.url');
         $host = is_string($url) ? parse_url($url, PHP_URL_HOST) : null;

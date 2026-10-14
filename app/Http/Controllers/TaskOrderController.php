@@ -18,7 +18,7 @@ class TaskOrderController extends Controller
 
         DB::transaction(function () use ($validated) {
             $tasks = Task::whereIn('id', $validated['ids'])
-                ->orderBy('position')->orderByDesc('id')
+                ->inDisplayOrder()
                 ->lockForUpdate()->get();
 
             abort_if($tasks->count() !== count($validated['ids']), 409, 'The list changed. Refresh and try again.');

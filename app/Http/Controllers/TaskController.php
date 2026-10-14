@@ -7,6 +7,7 @@ use App\Http\Requests\TaskRequest;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -24,7 +25,7 @@ class TaskController extends Controller
         $tasks = Task::query()
             ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
             ->when($status !== '', fn ($query) => $query->where('status', $status))
-            ->orderBy('position')->orderByDesc('id')
+            ->inDisplayOrder()
             ->paginate(10)
             ->withQueryString();
 
@@ -44,7 +45,7 @@ class TaskController extends Controller
 
     public function store(TaskRequest $request): RedirectResponse
     {
-        Task::create($request->validated());
+        DB::transaction(fn () => Task::create($request->validated()));
 
         return to_route('tasks.index')->with('success', 'Task created.');
     }
